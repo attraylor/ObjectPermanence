@@ -62,3 +62,7 @@ NO_LABELS_MODELS = [
     "opnet_no_labels",
     "opnet_lstm_mlp_no_labels"
 ]
+
+WORSER_MODELS = [
+    "worser_opnet"
+]

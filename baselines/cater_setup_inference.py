@@ -12,8 +12,11 @@ from baselines.datasets_factory import DatasetsFactory
 from baselines.proj_utils import get_class_prediction
 
 
-W_FRAME = 320
-H_FRAME = 240
+W_FRAME = 160#320
+H_FRAME = 120#240
+
+FRAME_SHAPES = [160, 120, 160, 120] #[320, 240, 320, 240]
+
 
 
 def transform_xyxy_to_w_h(predictions: np.ndarray) -> np.ndarray:
@@ -61,7 +64,7 @@ def cater_setup_inference(model_name: str, results_dir: str, inference_config_pa
     model.eval()
     model.to(device)
     with torch.no_grad():
-        frame_shapes = np.array([320, 240, 320, 240])
+        frame_shapes = np.array(FRAME_SHAPES)
 
         for batch_idx, sample in enumerate(data_loader):
 

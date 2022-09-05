@@ -177,10 +177,10 @@ parser.add_argument(
          "GPU rendering to work. For specifying a GPU, use "
          "CUDA_VISIBLE_DEVICES before running singularity.")
 parser.add_argument(
-    '--width', default=320, type=int,
+    '--width', default=160, type=int,
     help="The width (in pixels) for the rendered images")
 parser.add_argument(
-    '--height', default=240, type=int,
+    '--height', default=120, type=int,
     help="The height (in pixels) for the rendered images")
 parser.add_argument(
     '--key_light_jitter', default=1.0, type=float,

@@ -3,7 +3,7 @@ import numpy as np
 import pickle
 from typing import List, Dict
 from pathlib import Path
-
+import os
 import torch
 import torch.nn as nn
 from tqdm import tqdm
@@ -16,18 +16,24 @@ from baselines.supported_models import DOUBLE_OUTPUT_MODELS
 
 
 LARGE_CONS_INDICES = list(range(0, 64, 4))  # according to class -> index mapping file
-SNITCH_NAME = "small_gold_spl_metal_Spl_0"
-
+SNITCH_NAME = "ball1" #"small_gold_spl_metal_Spl_0"
+FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
+NUM_FRAMES = 38 #66#38 #66 #25 #300
 
 def get_experiment_videos(config: Dict[str, str]) -> List[str]:
-    videos_dir = config["videos_dir"]
-
+    videos_dir = config["sample_dir"]
+    worser = True
+    if worser == True:
+        ender = ".mp4"
+    else:
+        ender = ".avi"
     if "sample_file" not in config:
-        return [str(vid_path) for vid_path in Path(videos_dir).glob("*.avi")]
+        files = [str(vid_path).replace("_ground_truths.json", "") for vid_path in Path(videos_dir).glob("*_ground_truths.json")]
+        return files
 
     else:
         sample_file_path = config["sample_file"]
-        all_video_paths = list(Path(videos_dir).glob("*.avi"))
+        all_video_paths = list(Path(videos_dir).glob("*.{}".format(ender)))
         all_videos_names: Dict[str, str] = {path.stem: path for path in all_video_paths}
         select_videos_paths: List[str] = []
 
@@ -159,7 +165,7 @@ def trackers_inference_main(model_type: str, results_dir: str, config_path: str)
         DataHelper.write_bb_predictions_to_file(video_path, results_dir, snitch_bb_prediction)
 
 
-def reasoning_inference_main(model_name: str, results_dir: str, inference_config_path: str, model_config_path: str):
+def reasoning_inference_main(model_name: str, results_dir: str, inference_config_path: str, model_config_path: str, num_frames: int):
     with open(inference_config_path, "rb") as f:
         config: Dict[str, str] = json.load(f)
 
@@ -172,6 +178,8 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
     num_workers = int(config["num_workers"])
     model_path = config["model_path"]
     device = torch.device(config["device"])
+    print(samples_dir)
+    print(labels_dir)
 
     dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir)
     data_loader = data.DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
@@ -184,12 +192,13 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
     dataset_videos_indices: Dict[str, int] = {}
     dataset_predictions: List[np.ndarray] = []
     dataset_labels: List[np.ndarray] = []
+    dataset_track_pred = []
     current_sample_idx = 0
 
     model.eval()
     model.to(device)
     with torch.no_grad():
-        frame_shapes = np.array([320, 240, 320, 240])
+        frame_shapes = np.array(FRAME_SHAPES)
 
         for batch_idx, sample in enumerate(data_loader):
 
@@ -199,10 +208,10 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
             current_batch_size = len(labels)
 
             boxes = boxes.to(device)
-
             if model_name in DOUBLE_OUTPUT_MODELS:
                 output, index_to_track_prediction = model(boxes)
-
+                #print(index_to_track_prediction.shape, index_to_track_prediction.cpu().numpy().reshape(-1, 4).shape)
+                #sys.exit(1)
             else:
                 output = model(boxes)
 
@@ -210,19 +219,29 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
             batch_videos = {video_names[i]: i + current_sample_idx for i in range(current_batch_size)}
             batch_predictions = output.cpu().numpy().reshape(-1, 4)
             batch_labels = labels.numpy().reshape(-1, 4)
+            dataset_track_pred.append((video_names, index_to_track_prediction.cpu().numpy()))
 
             dataset_videos_indices.update(batch_videos)
             dataset_predictions.extend(batch_predictions)
             dataset_labels.extend(batch_labels)
             current_sample_idx += current_batch_size
-
-    dataset_predictions = (np.array(dataset_predictions) * frame_shapes).reshape((dataset_length, 300, 4)).astype(np.int32)
-    dataset_labels = (np.array(dataset_labels) * frame_shapes).reshape((dataset_length, 300, 4)).astype(np.int32)
+    print(np.array(dataset_predictions).shape, frame_shapes, dataset_length, num_frames)
+    
+    dataset_predictions = (np.array(dataset_predictions) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
+    dataset_labels = (np.array(dataset_labels) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
 
     # extract paths to video files for the experiment
     experiment_videos = get_experiment_videos(config)
     experiment_video_names = {str(Path(vid_path).stem): str(vid_path) for vid_path in experiment_videos}
 
+    track_obj_dir = os.path.join(results_dir, "tracked_objects")
+    if not os.path.exists(track_obj_dir):
+        os.makedirs(track_obj_dir)
+    
+    for vids, items in dataset_track_pred:
+        for idx, vid_name in enumerate(vids):
+            with open(os.path.join(track_obj_dir, "{}_object_track_preds.pkl".format(vid_name)), "wb+") as wf:
+                pickle.dump(items[idx].transpose(1,0), wf)
     # write debug videos
     for video_name, video_path in tqdm(experiment_video_names.items()):
         out_vid_path = str(Path(results_dir) / (video_name + "_results.avi"))
@@ -230,7 +249,7 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
 
         if video_idx is not None:
             video_predictions = dataset_predictions[video_idx]
-            video_labels = dataset_labels[video_idx]
+            '''video_labels = dataset_labels[video_idx]
 
             video_handler = VideoHandling(video_path, out_vid_path)
 
@@ -251,7 +270,7 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
                 video_handler.read_next_frame()
                 video_still_active = video_handler.check_video_still_active()
 
-            video_handler.complete_video_writing()
+            video_handler.complete_video_writing()'''
 
             # write bb results to file for future offline analysis
             DataHelper.write_bb_predictions_to_file(video_path, results_dir, video_predictions)

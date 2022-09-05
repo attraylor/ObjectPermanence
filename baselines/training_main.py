@@ -2,21 +2,25 @@ import time
 from typing import Dict, Any, List
 from pathlib import Path
 from datetime import date
-
+from random import randrange
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils import data
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+import os
 
 from baselines.models_factory import ModelsFactory
 from baselines.datasets_factory import DatasetsFactory
 from baselines.tracking_utils import ResultsAnalyzer
 from baselines.supported_models import DOUBLE_OUTPUT_MODELS, NO_LABELS_MODELS
 
+NUM_FRAMES = 66#25#38#25 #300
+FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
 
-def save_checkpoint(model: nn.Module, model_name: str, dev_iou: float, checkpoint_dir: str) -> None:
+
+def save_checkpoint(model: nn.Module, model_name: str, dev_iou: float, checkpoint_dir: str, epoch_num: int) -> None:
     current_date = date.today().strftime("%d-%m-%y")
 
     # create checkpoint folder if it doesn't exist
@@ -24,25 +28,24 @@ def save_checkpoint(model: nn.Module, model_name: str, dev_iou: float, checkpoin
     checkpoint_path.mkdir(parents=True, exist_ok=True)
 
     # save the model to dict
-    checkpoint_file = checkpoint_path / f"{current_date}_{dev_iou}.pth"
+    checkpoint_file = checkpoint_path / f"{epoch_num}_{current_date}_{dev_iou}.pth"
     torch.save(model.state_dict(), checkpoint_file)
     print(f"Saved best model so far on dev set with type {model_name} and performance mean IoU of: {dev_iou}")
 
 
 def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: torch.device, data_loader: data.DataLoader, dataset_length: int,
-                           reg_loss_function: nn.Module) -> Any:
+                           reg_loss_function: nn.Module, num_frames: int) -> Any:
     model.eval()
     model.to(compute_device)
 
     with torch.no_grad():
-
         dataset_indices: List[str] = []
         dataset_predictions: List[np.ndarray] = []
         dataset_labels: List[np.ndarray] = []
         dataset_containment: List[np.ndarray] = []
         total_loss = 0
         current_sample_idx = 0
-        frame_shapes = np.array([320, 240, 320, 240])
+        frame_shapes = np.array(FRAME_SHAPES)
 
         for batch_idx, sample in enumerate(data_loader):
             x, y, _ = sample
@@ -75,7 +78,7 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
                 pred_loss = torch.mean(pred_loss)
 
             if model_name in NO_LABELS_MODELS:
-                loss = pred_loss + 0.5 * consistency_loss
+                loss = pred_loss #+ 0.5 * consistency_loss
 
             else:
                 loss = pred_loss
@@ -95,9 +98,9 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
 
         # transform back to pixels scale (undo normalization)
         snitch_predictions: np.ndarray = (np.array(dataset_predictions) * frame_shapes).reshape(
-            (dataset_length, 300, 4)).astype(np.int32)
+            (dataset_length, num_frames, 4)).astype(np.int32)
         snitch_labels: np.ndarray = (np.array(dataset_labels) * frame_shapes).reshape(
-            (dataset_length, 300, 4)).astype(np.int32)
+            (dataset_length, num_frames, 4)).astype(np.int32)
         containment_mask: Dict[str, np.ndarray] = {str(i): dataset_containment[i] for i in range(dataset_length)}
 
         # analyze performance
@@ -117,7 +120,7 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
         return average_loss, mean_iou, containment_mean_iou
 
 
-def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int]):
+def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, prefixes: list = []):
 
     # create train and dev datasets using the files specified in the training configuration
     train_samples_dir = train_config["train_sample_dir"]
@@ -128,8 +131,8 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     dev_labels_dir = train_config["dev_labels_dir"]
     dev_containment_file = train_config["dev_containment_file"]
 
-    train_dataset: data.Dataset = DatasetsFactory.get_training_dataset(model_name, train_samples_dir, train_labels_dir, train_containment_file)
-    dev_dataset: data.Dataset = DatasetsFactory.get_training_dataset(model_name, dev_samples_dir, dev_labels_dir, dev_containment_file)
+    train_dataset: data.Dataset = DatasetsFactory.get_training_dataset(model_name, train_samples_dir, train_labels_dir, train_containment_file, num_frames, prefixes)
+    dev_dataset: data.Dataset = DatasetsFactory.get_training_dataset(model_name, dev_samples_dir, dev_labels_dir, dev_containment_file, num_frames,prefixes)
 
     # training hyper parameters and configuration
     batch_size = train_config["batch_size"]
@@ -140,7 +143,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     inference_batch_size = train_config["inference_batch_size"]
     scheduler_patience = train_config["lr_scheduler_patience"]
     scheduler_factor = train_config["lr_scheduler_factor"]
-    checkpoints_path = train_config["checkpoints_path"]
+    checkpoints_path = os.path.join(train_config["checkpoints_path"], date.today().strftime("%m-%d-%y--%H-%M-%S"))
     device = torch.device(train_config["device"])
     # consistency_rate = train_config["consistency_rate"]
 
@@ -237,8 +240,8 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
                 batches_running_const_loss = 0
 
         # end of epoch - compute mean iou over train and dev
-        train_loss, train_miou, train_containment_miou = inference_and_iou_comp(model_name, model, device, train_inference_loader, len(train_dataset), loss_function)
-        dev_loss, dev_miou, dev_containment_miou = inference_and_iou_comp(model_name, model, device, dev_loader, len(dev_dataset), loss_function)
+        train_loss, train_miou, train_containment_miou = inference_and_iou_comp(model_name, model, device, train_inference_loader, len(train_dataset), loss_function, num_frames)
+        dev_loss, dev_miou, dev_containment_miou = inference_and_iou_comp(model_name, model, device, dev_loader, len(dev_dataset), loss_function, num_frames)
 
         print("Epoch {} Training Set: Loss {:.4f}, Mean IoU {:.6f}, Mask Mean Iou {:.6f}".format(epoch_num, train_loss, train_miou, train_containment_miou))
         print("Epoch {} Dev Set: Loss {:.4f}, Mean IoU {:.6f}, Mask Mean Iou {:.6f}".format(epoch_num, dev_loss, dev_miou, dev_containment_miou))
@@ -249,4 +252,5 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
         # check if it is the best performing model so far and save it
         if dev_miou > highest_dev_iou:
             highest_dev_iou = dev_miou
-            save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
+            #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
+        save_checkpoint(model, model_name, dev_miou, checkpoints_path, epoch)

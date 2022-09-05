@@ -10,10 +10,12 @@ from torch.utils.data import Dataset
 
 from object_indices import is_cone_object
 
-SNITCH_NAME = "small_gold_spl_metal_Spl_0"
+SNITCH_NAME = "ball1"#"small_gold_spl_metal_Spl_0"
 SNITCH_INDEX = 140
-VIDEO_NUM_FRAMES = 300
+VIDEO_NUM_FRAMES = 66#25#38#25
 SNITCH_INPUT_TRACKER_INDEX = 0
+
+FRAME_SHAPES = [160, 120, 160, 120] #[320, 240, 320, 240]
 
 
 class CaterAbstractDataset(Dataset):
@@ -27,14 +29,13 @@ class CaterAbstractDataset(Dataset):
 
         # extra variables
         self.max_objects: int = 15
-        self.frame_shapes = np.array([320, 240, 320, 240])  # width, height, width, height
-        self.frame_shapes_for_labels = np.array([320, 240, 320, 240])
+        self.frame_shapes = np.array(FRAME_SHAPES)  # width, height, width, height
+        self.frame_shapes_for_labels = np.array(FRAME_SHAPES)
 
     def _load_snitch_labels_for_video(self, video_name: str) -> np.ndarray:
         video_labels_path = self.label_paths[video_name]
         with open(video_labels_path, "rb") as f:
             video_labels: Dict[str, List[List[int]]] = json.load(f)
-
         snitch_labels = video_labels[SNITCH_NAME]
 
         # convert from x,y,w,h to x,y,x,y
@@ -63,13 +64,19 @@ class CaterAbstractDataset(Dataset):
 
         return prediction_data
 
-    def _init_dataset_if_not_initiated(self) -> None:
+    def _init_dataset_if_not_initiated(self, prefixes=None) -> None:
         # if not initiated
         if len(self.videos_names) == 0:
 
             # init video names
             predictions_files = list(Path(self.predictions_dir).glob("*.pkl"))
             video_names = [str(file_.stem) for file_ in predictions_files]
+            if prefixes is not None and prefixes != []:
+                vn2 = []
+                for video in video_names:
+                    if any([prefix + "_" in video for prefix in prefixes]):
+                        vn2.append(video)
+                video_names = vn2
 
             video_names = sorted(video_names)
             self.videos_names = video_names
@@ -125,7 +132,7 @@ class CaterAbstractDataset(Dataset):
 class CaterAbstract5TracksForObjectsDataset(CaterAbstractDataset):
     def __init__(self, predictions_dir: str, label_dir: str):
         super().__init__(predictions_dir, label_dir)
-        self.frame_shapes = np.array([320, 240, 320, 240, 1])  # width, height, width, height and visibility flag
+        self.frame_shapes = np.array(FRAME_SHAPES)  # width, height, width, height and visibility flag
 
     def _normalize_and_pad_predictions(self, prediction_boxes: List[np.ndarray], object_labels: List[np.ndarray]) -> List[np.ndarray]:
         padded_video_boxes: List[np.ndarray] = []
@@ -260,7 +267,7 @@ class CaterAbstract5TracksForObjectsDataset(CaterAbstractDataset):
 class CaterAbstract6TracksForObjectsDataset(CaterAbstractDataset):
     def __init__(self, predictions_dir: str, label_dir: str):
         super().__init__(predictions_dir, label_dir)
-        self.frame_shapes = np.array([320, 240, 320, 240, 1, 1])  # width, height, width, height and visibility flag, is cone flag
+        self.frame_shapes = np.array(FRAME_SHAPES + [1, 1])  # width, height, width, height and visibility flag, is cone flag
 
     def _normalize_and_pad_predictions(self, prediction_boxes: List[np.ndarray], object_labels: List[np.ndarray]) -> List[np.ndarray]:
         padded_video_boxes: List[np.ndarray] = []
@@ -450,9 +457,10 @@ class Cater5TracksForObjectsInferenceDataset(CaterAbstract5TracksForObjectsDatas
 
 
 class Cater5TracksForObjectsTrainingDataset(CaterAbstract5TracksForObjectsDataset):
-    def __init__(self, predictions_dir: str, label_dir: str, mask_annotations_path: str):
+    def __init__(self, predictions_dir: str, label_dir: str, mask_annotations_path: str, num_frames: int, prefixes: list = []):
         super().__init__(predictions_dir, label_dir)
         self.mask_annotations_path: str = mask_annotations_path
+        self.num_frames = num_frames
 
         # add labels and mask attributes
         self.mask_frames: Dict[str, np.ndarray] = {}
@@ -484,7 +492,7 @@ class Cater5TracksForObjectsTrainingDataset(CaterAbstract5TracksForObjectsDatase
 
         # get occlusions annotations
         mask_frames: np.ndarray = self.mask_frames[video_name]
-        mask: np.ndarray = np.zeros((VIDEO_NUM_FRAMES, 4), dtype=np.bool)
+        mask: np.ndarray = np.zeros((self.num_frames, 4), dtype=np.bool)
         mask[mask_frames, :] = True
 
         # load predictions
@@ -509,17 +517,19 @@ class Cater5TracksForObjectsTrainingDataset(CaterAbstract5TracksForObjectsDatase
 
 
 class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDataset):
-    def __init__(self, predictions_dir: str, label_dir: str, mask_annotations_path: str):
+    def __init__(self, predictions_dir: str, label_dir: str, mask_annotations_path: str, num_frames: int, prefixes: list = []):
         super().__init__(predictions_dir, label_dir)
+        self.prefixes = prefixes
         self.mask_annotations_path: str = mask_annotations_path
 
         # add labels and mask attributes
         self.mask_frames: Dict[str, np.ndarray] = {}
+        self.num_frames = num_frames
 
     def _init_dataset_if_not_initiated(self) -> None:
         # if not initiated
         if len(self.videos_names) == 0:
-            super()._init_dataset_if_not_initiated()
+            super()._init_dataset_if_not_initiated(self.prefixes)
 
             # init occlusions annotations
             with open(self.mask_annotations_path, "r") as f:
@@ -543,7 +553,7 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
         # get occlusions annotations
         mask_frames: np.ndarray = self.mask_frames[video_name]
-        mask: np.ndarray = np.zeros((VIDEO_NUM_FRAMES, 4), dtype=np.bool)
+        mask: np.ndarray = np.zeros((self.num_frames, 4), dtype=np.bool)
         mask[mask_frames, :] = True
 
         # load predictions
@@ -569,6 +579,7 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
 class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDataset):
     def __init__(self, predictions_dir: str, label_dir: str):
+        print(predictions_dir, label_dir)
         super().__init__(predictions_dir, label_dir)
 
     def __getitem__(self, idx: int) -> Tuple[Tuple[torch.tensor, torch.tensor], Tuple[torch.tensor, torch.tensor], str]:

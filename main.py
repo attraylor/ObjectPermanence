@@ -1,6 +1,9 @@
 import json
 import argparse
 from typing import Dict, Any
+import os
+import sys
+sys.path = ["/users/atraylor/anaconda/OP/lib/python3.7/site-packages"] + sys.path
 
 from baselines.analyze_iou_offline import analyze_results
 from baselines.training_main import training_main
@@ -25,6 +28,8 @@ if __name__ == '__main__':
                                   help="a path to config file for the experiment")
     inference_parser.add_argument("--model_config", type=str, required=False,
                                   help="a path to config file for the experiment")
+    inference_parser.add_argument("--num_frames", type=int, required=True,
+                                  help="number of frames for the inference sequence")
 
     # create parser for the inference command
     preprocess_parser = subparsers.add_parser('preprocess')
@@ -34,7 +39,7 @@ if __name__ == '__main__':
     preprocess_parser.add_argument("--config", type=str, required=True,
                                   help="a path to config file for the experiment")
 
-    # create parser for the inference command
+    # create parser for the training command
     training_parser = subparsers.add_parser('training')
     training_parser.set_defaults(mode="training")
     training_parser.add_argument("--model_type", type=str, required=True, choices=TRAINING_SUPPORTED_MODELS,
@@ -43,6 +48,10 @@ if __name__ == '__main__':
                                  help="a path to config file for the model hyper-parameters experiment")
     training_parser.add_argument("--training_config", type=str, required=True,
                                  help="a path to config file for the training experiment hyper-parameters")
+    training_parser.add_argument("--num_frames", type=int, required=True,
+                                 help="number of frames for the inference sequence")
+    training_parser.add_argument("--prefixes", type=str, default="",
+                                 help="valid prefixes in the training dataset to read as input. leave blank to read all prefixes")
 
     # create a parser for offline results analysis
     analysis_parser = subparsers.add_parser('analysis')
@@ -80,6 +89,8 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
     mode = args.mode
+    if hasattr (args, "results_dir") and not os.path.exists(args.results_dir):
+        os.makedirs(args.results_dir)
     if mode == "inference":
         model_type = args.model_type
         results_dir = args.results_dir
@@ -88,7 +99,7 @@ if __name__ == '__main__':
 
         # run experiment
         if model_type in TRAINING_SUPPORTED_MODELS:
-            reasoning_inference_main(model_type, results_dir, inference_config_path, model_config_path)
+            reasoning_inference_main(model_type, results_dir, inference_config_path, model_config_path,args.num_frames)
 
         else:
             trackers_inference_main(model_type, results_dir, inference_config_path)
@@ -104,15 +115,20 @@ if __name__ == '__main__':
         model_type = args.model_type
         model_config_path = args.model_config
         train_config_path = args.training_config
-
+        
         # load model and training configuration for json files
         with open(model_config_path, "rb") as f:
             model_config: Dict[str, int] = json.load(f)
 
         with open(train_config_path, "rb") as f:
             train_config: Dict[str, Any] = json.load(f)
-
-        training_main(model_type, train_config, model_config)
+    
+        if train_config.get("prefixes", "") == "":
+            prefixes = []
+        else:
+            prefixes = train_config["prefixes"].split(",")
+        print(prefixes)
+        training_main(model_type, train_config, model_config, args.num_frames, prefixes)
 
     if mode == "analysis":
         predictions_dir = args.predictions_dir

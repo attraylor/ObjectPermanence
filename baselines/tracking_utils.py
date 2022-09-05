@@ -99,7 +99,7 @@ class DataHelper(object):
         predictions_path = Path(predictions_dir) / prediction_file_name
 
         snitch_bb_prediction = [[int(x1), int(y1), int(x2), int(y2)] for [x1, y1, x2, y2] in snitch_bb_prediction]
-        with open(predictions_path, 'w') as f:
+        with open(predictions_path, 'w+') as f:
             json.dump(snitch_bb_prediction, f, indent=2)
 
 

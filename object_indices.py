@@ -1,3 +1,29 @@
+WORSER_OBJECTS = {
+    "ball1": 140,
+    "occluder1": 0,
+    "occluder2": 1,
+    "occluder3": 2,
+    "occluder4": 3,
+    "occluder5": 4,
+    "front_occluder1": 5,
+    "front_occluder2": 6,
+    "front_occluder3": 7,
+    "front_occluder4": 8,
+    "front_occluder5": 9,
+    "cup1": 10,
+    "cup2": 11,
+    "cup3": 12,
+    "cup4": 13,
+    "cup5": 14,
+    "wedge1": 15,
+    "wedge2": 16,
+    "wedge3": 17,
+    "wedge4": 18,
+    "wedge5": 19,
+}
+
+WORSER_IDX_TO_NAME = {idx: name for name, idx in WORSER_OBJECTS.items()}
+
 OBJECTS_NAME_TO_IDX = {
     "large_blue_cone_metal": 0,
     "large_blue_cube_metal": 1,
