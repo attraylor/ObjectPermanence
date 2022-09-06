@@ -1,7 +1,7 @@
 import time
 from typing import Dict, Any, List
 from pathlib import Path
-from datetime import date
+from datetime import datetime
 from random import randrange
 from baselines.inference_main import modified_inference_main
 import numpy as np
@@ -151,7 +151,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     inference_batch_size = train_config["inference_batch_size"]
     scheduler_patience = train_config["lr_scheduler_patience"]
     scheduler_factor = train_config["lr_scheduler_factor"]
-    checkpoints_path = os.path.join(train_config["checkpoints_path"], date.today().strftime("%m-%d-%y--%H-%M-%S"))
+    checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S"))
     device = torch.device(train_config["device"])
     # consistency_rate = train_config["consistency_rate"]
 
