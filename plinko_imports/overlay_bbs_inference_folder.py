@@ -118,6 +118,7 @@ def overlay_main(args):
 			screen.fill((0, 0, 0, 0))
 		video_path = os.path.join(video_dir, d + ".mp4")
 		subprocess.run("ffmpeg -nostats -loglevel 0 -y -framerate 5 -pattern_type glob -i '{}/*.png' -c:v libx264 -pix_fmt yuv420p {}".format(out_path, video_path), shell=True)
+	subprocess.run("rm -rf ".format(args.frames_dir), shell=True)
 
 
 if __name__ == "__main__":

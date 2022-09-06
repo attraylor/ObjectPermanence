@@ -265,6 +265,10 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
             #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
             save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch)
             for spl in splits:
+                fd2 = Path(checkpoints_path) / "best_frames" / spl
+                vd2 = Path(checkpoints_path) / "best_videos" / spl
+                fd2.mkdir(parents=True, exist_ok=True)
+                vd2.mkdir(parents=True, exist_ok=True)
                 results_dir = "results/{}/{}/{}".format(name, setting, spl)
                 data_head, _ = os.path.split(train_samples_dir)
                 inf_samples_dir = os.path.join(data_head, spl)
@@ -274,8 +278,8 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
 				#python ../plinko/src/overlay_bbs_inference_folder.py --name "${name}/${split}" --frames_dir "vid_out/frames/${name}/${setting}/${split}" --video_dir "vid_out/videos/${name}/${setting}/${split}" --model_name "${name}/${setting}/${split}/"
                 overlay_args = {
 								"name": "{}/{}".format(name, spl),
-								"frames_dir": "vid_out/frames/{}/{}/{}".format(name, setting, spl),
-								"video_dir": "vid_out/videos/{}/{}/{}".format(name, setting, spl),
+								"frames_dir": fd2,
+								"video_dir": vd2,
 								"model_name": "{}/{}/{}/".format(name, setting, spl),
 								}
                 overlay_ns = Namespace(**overlay_args)
