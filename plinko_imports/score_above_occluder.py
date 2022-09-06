@@ -273,8 +273,6 @@ def score_main(args):
 		if score == 2:
 			before_missing += 1
 			missing = True
-		if score != 1 and args.verbose == True:
-			print("before wrong", code)
 		#else it is wrong
 		score_pairs_obj = {
 				"before_or_after": "before",
