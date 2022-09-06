@@ -266,7 +266,6 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
             save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch)
             for spl in splits:
                 results_dir = "results/{}/{}/{}".format(name, setting, spl)
-                print(results_dir)
                 data_head, _ = os.path.split(train_samples_dir)
                 inf_samples_dir = os.path.join(data_head, spl)
                 inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))

@@ -333,5 +333,26 @@ def modified_inference_main(model, model_name: str, results_dir: str, samples_di
         for idx, vid_name in enumerate(vids):
             with open(os.path.join(track_obj_dir, "{}_object_track_preds.pkl".format(vid_name)), "wb+") as wf:
                 pickle.dump(items[idx].transpose(1,0), wf)
+
+    experiment_videos = get_experiment_videos({"sample_dir": samples_dir})
+    experiment_video_names = {str(Path(vid_path).stem): str(vid_path) for vid_path in experiment_videos}
+
+    track_obj_dir = os.path.join(results_dir, "tracked_objects")
+    if not os.path.exists(track_obj_dir):
+        os.makedirs(track_obj_dir)
+    
+    for vids, items in dataset_track_pred:
+        for idx, vid_name in enumerate(vids):
+            with open(os.path.join(track_obj_dir, "{}_object_track_preds.pkl".format(vid_name)), "wb+") as wf:
+                pickle.dump(items[idx].transpose(1,0), wf)
+    # write debug videos
+    for video_name, video_path in tqdm(experiment_video_names.items()):
+        video_idx = dataset_videos_indices.get(video_name, None)
+
+        if video_idx is not None:
+            video_predictions = dataset_predictions[video_idx]
+
+            # write bb results to file for future offline analysis
+            DataHelper.write_bb_predictions_to_file(video_path, results_dir, video_predictions)
     
     model.train()
