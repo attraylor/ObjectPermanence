@@ -17,14 +17,14 @@ class DatasetsFactory(object):
             return WorserDataset(samples_dir, labels_dir, mask_file_path, num_frames)
 
     @staticmethod
-    def get_inference_dataset(model_name: str, samples_dir: str, labels_dir: str) -> CaterAbstractDataset:
+    def get_inference_dataset(model_name: str, samples_dir: str, labels_dir: str, prefixes: list) -> CaterAbstractDataset:
 
         if model_name in PROGRAMMED_MODELS + TRAINING_SUPPORTED_MODELS_5_TRACKS:
             return Cater5TracksForObjectsInferenceDataset(samples_dir, labels_dir)
 
         if model_name in TRAINING_SUPPORTED_MODELS_6_TRACKS:
 			#AT: It uses this one!
-            return Cater6TracksForObjectsInferenceDataset(samples_dir, labels_dir)
+            return Cater6TracksForObjectsInferenceDataset(samples_dir, labels_dir, prefixes)
 
         if model_name in WORSER_MODELS:
             return WorserInferenceDataset(samples_dir, labels_dir)

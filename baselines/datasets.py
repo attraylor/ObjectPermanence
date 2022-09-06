@@ -69,14 +69,15 @@ class CaterAbstractDataset(Dataset):
         if len(self.videos_names) == 0:
 
             # init video names
-            predictions_files = list(Path(self.predictions_dir).glob("*.pkl"))
-            video_names = [str(file_.stem) for file_ in predictions_files]
-            if prefixes is not None and prefixes != []:
-                vn2 = []
-                for video in video_names:
-                    if any([prefix + "_" in video for prefix in prefixes]):
-                        vn2.append(video)
-                video_names = vn2
+            video_names = []
+            if prefixes is None or prefixes == []:
+                print("deprecated without prefixes")
+                sys.exit(1)
+            for prefix in prefixes:
+                pred_path = Path(self.predictions_dir) / prefix
+                predictions_files = list(pred_path.glob("*.pkl"))
+                vn2 = [str(file_.stem) for file_ in predictions_files]
+                video_names += vn2
 
             video_names = sorted(video_names)
             self.videos_names = video_names
@@ -578,11 +579,12 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
 
 class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDataset):
-    def __init__(self, predictions_dir: str, label_dir: str):
+    def __init__(self, predictions_dir: str, label_dir: str, prefixes: list):
         super().__init__(predictions_dir, label_dir)
+        self.prefixes = prefixes
 
     def __getitem__(self, idx: int) -> Tuple[Tuple[torch.tensor, torch.tensor], Tuple[torch.tensor, torch.tensor], str]:
-        self._init_dataset_if_not_initiated()
+        self._init_dataset_if_not_initiated(self.prefixes)
 
         video_name = self.videos_names[idx]
 
