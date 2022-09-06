@@ -29,7 +29,7 @@ FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
 
 
 def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int) -> None:
-    current_date = date.today().strftime("%d-%m-%y")
+    current_date = datetime.now().strftime("%m-%d-%y--%H-%M-%S")
 
     # create checkpoint folder if it doesn't exist
     checkpoint_path = Path(checkpoint_dir) / model_name
