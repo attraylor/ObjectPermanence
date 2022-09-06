@@ -3,13 +3,21 @@ from typing import Dict, Any, List
 from pathlib import Path
 from datetime import date
 from random import randrange
+from baselines.inference_main import modified_inference_main
 import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
 from torch.utils import data
 from torch.optim.lr_scheduler import ReduceLROnPlateau
+from argparse import Namespace
+
+
 import os
+from inference_main import modified_inference_main
+
+from plinko_imports.overlay_bbs_inference_folder import overlay_main
+from plinko_imports.score_above_occluder import score_main
 
 from baselines.models_factory import ModelsFactory
 from baselines.datasets_factory import DatasetsFactory
@@ -20,7 +28,7 @@ NUM_FRAMES = 66#25#38#25 #300
 FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
 
 
-def save_checkpoint(model: nn.Module, model_name: str, dev_iou: float, checkpoint_dir: str, epoch_num: int) -> None:
+def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int) -> None:
     current_date = date.today().strftime("%d-%m-%y")
 
     # create checkpoint folder if it doesn't exist
@@ -28,9 +36,9 @@ def save_checkpoint(model: nn.Module, model_name: str, dev_iou: float, checkpoin
     checkpoint_path.mkdir(parents=True, exist_ok=True)
 
     # save the model to dict
-    checkpoint_file = checkpoint_path / f"{epoch_num}_{current_date}_{dev_iou}.pth"
+    checkpoint_file = checkpoint_path / f"{epoch_num}_{current_date}_{dev_loss}.pth"
     torch.save(model.state_dict(), checkpoint_file)
-    print(f"Saved best model so far on dev set with type {model_name} and performance mean IoU of: {dev_iou}")
+    print(f"Saved best model so far on dev set with type {model_name} and performance loss of: {dev_loss}")
 
 
 def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: torch.device, data_loader: data.DataLoader, dataset_length: int,
@@ -120,7 +128,7 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
         return average_loss, mean_iou, containment_mean_iou
 
 
-def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, prefixes: list = []):
+def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, name: str, setting: str, splits: list, prefixes: list = []):
 
     # create train and dev datasets using the files specified in the training configuration
     train_samples_dir = train_config["train_sample_dir"]
@@ -161,9 +169,11 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     train_inference_loader = data.DataLoader(train_dataset, **inference_config_dict)
     dev_loader = data.DataLoader(dev_dataset, **inference_config_dict)
 
+	
+
     # Start training
     model = model.to(device)
-    highest_dev_iou: float = 0
+    lowest_dev_loss: float = 100000
     train_start_time = time.time()
 
     for epoch in range(num_epochs):
@@ -250,7 +260,32 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
         scheduler.step(train_loss)
 
         # check if it is the best performing model so far and save it
-        if dev_miou > highest_dev_iou:
-            highest_dev_iou = dev_miou
+        if dev_loss > lowest_dev_loss:
+            lowest_dev_loss = dev_loss
             #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
-        save_checkpoint(model, model_name, dev_miou, checkpoints_path, epoch)
+            save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch)
+            for spl in splits:
+                results_dir = "results/{}/{}/{}".format(name, setting, spl)
+                data_head, _ = os.path.split(train_samples_dir)
+                inf_samples_dir = os.path.join(data_head, spl)
+                inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
+                modified_inference_main(model, model_name, results_dir, inf_samples_dir, inf_labels_dir, 
+											batch_size, num_workers, device, num_frames)
+				#python ../plinko/src/overlay_bbs_inference_folder.py --name "${name}/${split}" --frames_dir "vid_out/frames/${name}/${setting}/${split}" --video_dir "vid_out/videos/${name}/${setting}/${split}" --model_name "${name}/${setting}/${split}/"
+                overlay_args = {
+								"name": "{}/{}".format(name, spl),
+								"frames_dir": "vid_out/frames/{}/{}/{}".format(name, setting, spl),
+								"vid_dir": "vid_out/videos/{}/{}/{}".format(name, setting, spl),
+								"model_name": "{}/{}/{}/".format(name, setting, spl),
+								}
+                overlay_ns = Namespace(**overlay_args)
+
+                overlay_main(overlay_ns)
+                score_args = {
+								"name": "{}/{}".format(name, spl),
+								"frames_dir": "vid_out/frames/{}/{}/{}".format(name, setting, spl),
+								"vid_dir": "vid_out/videos/{}/{}/{}".format(name, setting, spl),
+								"model_name": "{}/{}/{}/".format(name, setting, spl),
+								}
+                score_ns = Namespace(**score_args)
+                score_main(score_ns)

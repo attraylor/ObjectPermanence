@@ -52,6 +52,15 @@ if __name__ == '__main__':
                                  help="number of frames for the inference sequence")
     training_parser.add_argument("--prefixes", type=str, default="",
                                  help="valid prefixes in the training dataset to read as input. leave blank to read all prefixes")
+    training_parser.add_argument("--results_dir", type=str, required=True,
+                                  help="a path to a a dictionary to save results videos and predictions output")
+    training_parser.add_argument("--name", type=str, required=True,
+                                  help="name of the data ver")
+    training_parser.add_argument("--setting", type=str, required=True,
+                                  help="name of the data type (eg. id, sp)")
+    training_parser.add_argument("--splits", type=str, required=True,
+                                  help="test names, split on comma")
+
 
     # create a parser for offline results analysis
     analysis_parser = subparsers.add_parser('analysis')

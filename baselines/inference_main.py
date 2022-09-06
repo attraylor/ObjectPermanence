@@ -274,3 +274,64 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
 
             # write bb results to file for future offline analysis
             DataHelper.write_bb_predictions_to_file(video_path, results_dir, video_predictions)
+
+
+def modified_inference_main(model, model_name: str, results_dir: str, samples_dir: str, 
+							labels_dir: str, batch_size: int, num_workers: int, device: str, num_frames: int):
+    dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir)
+    data_loader = data.DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
+    dataset_length = len(dataset)
+
+    # predict model results
+    dataset_videos_indices: Dict[str, int] = {}
+    dataset_predictions: List[np.ndarray] = []
+    dataset_labels: List[np.ndarray] = []
+    dataset_track_pred = []
+    current_sample_idx = 0
+
+    model.eval()
+    model.to(device)
+    with torch.no_grad():
+        frame_shapes = np.array(FRAME_SHAPES)
+
+        for batch_idx, sample in enumerate(data_loader):
+
+            x, y, video_names = sample
+            boxes, index_to_track_labels = x
+            labels, _ = y
+            current_batch_size = len(labels)
+
+            boxes = boxes.to(device)
+            if model_name in DOUBLE_OUTPUT_MODELS:
+                output, index_to_track_prediction = model(boxes)
+                #print(index_to_track_prediction.shape, index_to_track_prediction.cpu().numpy().reshape(-1, 4).shape)
+                #sys.exit(1)
+            else:
+                output = model(boxes)
+
+            # move outputs to cpu and flatten output and labels
+            batch_videos = {video_names[i]: i + current_sample_idx for i in range(current_batch_size)}
+            batch_predictions = output.cpu().numpy().reshape(-1, 4)
+            batch_labels = labels.numpy().reshape(-1, 4)
+            dataset_track_pred.append((video_names, index_to_track_prediction.cpu().numpy()))
+
+            dataset_videos_indices.update(batch_videos)
+            dataset_predictions.extend(batch_predictions)
+            dataset_labels.extend(batch_labels)
+            current_sample_idx += current_batch_size
+    
+    dataset_predictions = (np.array(dataset_predictions) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
+    dataset_labels = (np.array(dataset_labels) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
+
+    # extract paths to video files for the experiment
+
+    track_obj_dir = os.path.join(results_dir, "tracked_objects")
+    if not os.path.exists(track_obj_dir):
+        os.makedirs(track_obj_dir)
+    
+    for vids, items in dataset_track_pred:
+        for idx, vid_name in enumerate(vids):
+            with open(os.path.join(track_obj_dir, "{}_object_track_preds.pkl".format(vid_name)), "wb+") as wf:
+                pickle.dump(items[idx].transpose(1,0), wf)
+    
+    model.train()
