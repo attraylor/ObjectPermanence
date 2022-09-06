@@ -260,7 +260,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
         scheduler.step(train_loss)
 
         # check if it is the best performing model so far and save it
-        if dev_loss > lowest_dev_loss:
+        if dev_loss < lowest_dev_loss:
             lowest_dev_loss = dev_loss
             #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
             save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch)
