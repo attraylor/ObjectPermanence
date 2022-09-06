@@ -152,6 +152,8 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     scheduler_patience = train_config["lr_scheduler_patience"]
     scheduler_factor = train_config["lr_scheduler_factor"]
     checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S"))
+    print("CHECKPOINT PATH")
+    print(checkpoints_path)
     device = torch.device(train_config["device"])
     # consistency_rate = train_config["consistency_rate"]
 
