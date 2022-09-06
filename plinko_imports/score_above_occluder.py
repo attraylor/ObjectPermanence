@@ -137,7 +137,6 @@ def get_iou(bb1, bb2):
     cond4 = bb2['y1'] < bb2['y2']
 
     if not all([cond1, cond2, cond3, cond4]):
-        print(bb1, bb2)
         return 0.0
 
     # determine the coordinates of the intersection rectangle
@@ -321,8 +320,6 @@ def score_main(args):
 			if score == 2:
 				missing = True
 				after_missing += 1
-			if score != 1 and args.verbose == True:
-				print("after wrong", code)
 
 			crit_correct.append(correct_occluder)
 			crit_missing.append(missing)

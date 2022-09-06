@@ -346,7 +346,7 @@ def modified_inference_main(model, model_name: str, results_dir: str, samples_di
             with open(os.path.join(track_obj_dir, "{}_object_track_preds.pkl".format(vid_name)), "wb+") as wf:
                 pickle.dump(items[idx].transpose(1,0), wf)
     # write debug videos
-    for video_name, video_path in tqdm(experiment_video_names.items()):
+    for video_name, video_path in experiment_video_names.items():
         video_idx = dataset_videos_indices.get(video_name, None)
 
         if video_idx is not None:
