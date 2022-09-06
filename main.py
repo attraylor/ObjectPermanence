@@ -135,9 +135,9 @@ if __name__ == '__main__':
             prefixes = train_config["prefixes"].split(",")
         print(prefixes)
 
-        splits = train_config["splits"].split(",")
+        splits = args.splits.split(",")
 
-        training_main(model_type, train_config, model_config, args.num_frames, train_config["name"], train_config["setting"], splits, prefixes)
+        training_main(model_type, train_config, model_config, args.num_frames, args.name, args.setting, splits, prefixes)
 
     if mode == "analysis":
         predictions_dir = args.predictions_dir
