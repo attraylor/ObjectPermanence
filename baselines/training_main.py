@@ -14,7 +14,7 @@ from argparse import Namespace
 
 
 import os
-from inference_main import modified_inference_main
+from baselines.inference_main import modified_inference_main
 
 from plinko_imports.overlay_bbs_inference_folder import overlay_main
 from plinko_imports.score_above_occluder import score_main
