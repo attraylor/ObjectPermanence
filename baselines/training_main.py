@@ -282,10 +282,9 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
 
                 overlay_main(overlay_ns)
                 score_args = {
-								"name": "{}/{}".format(name, spl),
-								"frames_dir": "vid_out/frames/{}/{}/{}".format(name, setting, spl),
-								"vid_dir": "vid_out/videos/{}/{}/{}".format(name, setting, spl),
-								"model_name": "{}/{}/{}/".format(name, setting, spl),
+								"name": name,
+								"setting": setting,
+								"split": spl
 								}
                 score_ns = Namespace(**score_args)
                 score_main(score_ns)

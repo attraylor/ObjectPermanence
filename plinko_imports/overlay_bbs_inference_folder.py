@@ -117,7 +117,7 @@ def overlay_main(args):
 			pygame.image.save(screen, os.path.join(out_path, "{0:04}.png".format(i)))
 			screen.fill((0, 0, 0, 0))
 		video_path = os.path.join(video_dir, d + ".mp4")
-		subprocess.run("ffmpeg -y -framerate 5 -pattern_type glob -i '{}/*.png' -c:v libx264 -pix_fmt yuv420p {}".format(out_path, video_path), shell=True)
+		subprocess.run("ffmpeg -nostats -loglevel 0 -y -framerate 5 -pattern_type glob -i '{}/*.png' -c:v libx264 -pix_fmt yuv420p {}".format(out_path, video_path), shell=True)
 
 		print("done")
 
