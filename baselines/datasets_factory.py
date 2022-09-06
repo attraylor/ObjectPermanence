@@ -20,11 +20,10 @@ class DatasetsFactory(object):
     def get_inference_dataset(model_name: str, samples_dir: str, labels_dir: str) -> CaterAbstractDataset:
 
         if model_name in PROGRAMMED_MODELS + TRAINING_SUPPORTED_MODELS_5_TRACKS:
-            print("inference 5 tracks")
             return Cater5TracksForObjectsInferenceDataset(samples_dir, labels_dir)
 
         if model_name in TRAINING_SUPPORTED_MODELS_6_TRACKS:
-            print("inference 6 tracks")
+			#AT: It uses this one!
             return Cater6TracksForObjectsInferenceDataset(samples_dir, labels_dir)
 
         if model_name in WORSER_MODELS:
