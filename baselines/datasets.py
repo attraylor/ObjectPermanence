@@ -579,7 +579,6 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
 class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDataset):
     def __init__(self, predictions_dir: str, label_dir: str):
-        print(predictions_dir, label_dir)
         super().__init__(predictions_dir, label_dir)
 
     def __getitem__(self, idx: int) -> Tuple[Tuple[torch.tensor, torch.tensor], Tuple[torch.tensor, torch.tensor], str]:
