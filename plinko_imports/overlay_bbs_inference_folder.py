@@ -77,7 +77,6 @@ def overlay_main(args):
 
 	for d in os.listdir(image_dir_path):
 		subdir = os.path.join(image_dir_path, d)
-		print(subdir)
 		if not os.path.isdir(subdir):
 			continue
 
@@ -115,9 +114,6 @@ def overlay_main(args):
 			top_x, top_y, bottom_x, bottom_y = bb
 			areas.append((bottom_x - top_x) * (bottom_y - top_y))
 			pygame.draw.rect(screen, color=(52, 189, 235, 255), rect=[top_x, top_y, bottom_x - top_x, bottom_y - top_y])
-			'''print(bbs_at_i)
-			print(areas)
-			a = input("q")'''
 			pygame.image.save(screen, os.path.join(out_path, "{0:04}.png".format(i)))
 			screen.fill((0, 0, 0, 0))
 		video_path = os.path.join(video_dir, d + ".mp4")
