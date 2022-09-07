@@ -560,7 +560,7 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
         mask[mask_frames, :] = True
 
         # load predictions
-        video_predictions_path = str(self.predictions_dir / (video_name + ".pkl"))
+        video_predictions_path = str(self.predictions_dir / self.vn_to_prefix[video_name] / (video_name + ".pkl"))
         prediction_data = self._load_predictions_pkl(video_predictions_path)
 
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
