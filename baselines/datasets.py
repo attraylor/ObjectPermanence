@@ -78,15 +78,13 @@ class CaterAbstractDataset(Dataset):
                 pred_path = Path(self.predictions_dir) / prefix
                 predictions_files = list(pred_path.glob("*.pkl"))
                 vn2 = [str(file_.stem) for file_ in predictions_files]
+                for video_name in vn2:
+                    video_labels_path = self.labels_dir / prefix / (video_name + "_bb.json")
+                    self.label_paths[video_name] = str(video_labels_path)
                 video_names += vn2
 
             video_names = sorted(video_names)
             self.videos_names = video_names
-
-            # init video label paths
-            for video_name in self.videos_names:
-                video_labels_path = self.labels_dir / (video_name + "_bb.json")
-                self.label_paths[video_name] = str(video_labels_path)
 
     def _get_all_video_objects(self, object_labels: List[np.ndarray]) -> List[int]:
         video_objects = set()
