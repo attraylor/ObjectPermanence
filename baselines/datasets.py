@@ -81,15 +81,16 @@ class CaterAbstractDataset(Dataset):
                     self.label_paths[video_name] = str(video_labels_path)
                     self.vn_to_prefix[video_name] = None
                 video_names += vn2
-            for prefix in prefixes:
-                pred_path = Path(self.predictions_dir) / prefix
-                predictions_files = list(pred_path.glob("*.pkl"))
-                vn2 = [str(file_.stem) for file_ in predictions_files]
-                for video_name in vn2:
-                    video_labels_path = self.labels_dir / prefix / (video_name + "_bb.json")
-                    self.label_paths[video_name] = str(video_labels_path)
-                    self.vn_to_prefix[video_name] = prefix
-                video_names += vn2
+            else:
+                for prefix in prefixes:
+                    pred_path = Path(self.predictions_dir) / prefix
+                    predictions_files = list(pred_path.glob("*.pkl"))
+                    vn2 = [str(file_.stem) for file_ in predictions_files]
+                    for video_name in vn2:
+                        video_labels_path = self.labels_dir / prefix / (video_name + "_bb.json")
+                        self.label_paths[video_name] = str(video_labels_path)
+                        self.vn_to_prefix[video_name] = prefix
+                    video_names += vn2
 
             video_names = sorted(video_names)
             self.videos_names = video_names
