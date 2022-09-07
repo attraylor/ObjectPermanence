@@ -68,6 +68,7 @@ class CaterAbstractDataset(Dataset):
     def _init_dataset_if_not_initiated(self, prefixes=None) -> None:
         # if not initiated
         if len(self.videos_names) == 0:
+            self.vn_to_prefix = {}
 
             # init video names
             video_names = []
@@ -81,6 +82,7 @@ class CaterAbstractDataset(Dataset):
                 for video_name in vn2:
                     video_labels_path = self.labels_dir / prefix / (video_name + "_bb.json")
                     self.label_paths[video_name] = str(video_labels_path)
+                    self.vn_to_prefix[video_name] = prefix
                 video_names += vn2
 
             video_names = sorted(video_names)
@@ -436,7 +438,7 @@ class Cater5TracksForObjectsInferenceDataset(CaterAbstract5TracksForObjectsDatas
         snitch_labels: np.ndarray = self._load_snitch_labels_for_video(video_name)
 
         # load predictions
-        video_predictions_path = str(self.predictions_dir / (video_name + ".pkl"))
+        video_predictions_path = str(self.predictions_dir / self.vn_to_prefix[video_name] / (video_name + ".pkl"))
         prediction_data = self._load_predictions_pkl(video_predictions_path)
 
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
