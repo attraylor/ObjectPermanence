@@ -534,17 +534,17 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
             super()._init_dataset_if_not_initiated(self.prefixes)
             for prefix in self.prefixes:
                 mask_path = os.path.join(self.mask_annotations_path, prefix, "masks.txt")
-				# init occlusions annotations
-				with open(mask_path, "r") as f:
-					for line in f:
-						line = line[:-1]
-						video_name, mask_frames_str = line.split(sep="\t")
-						if video_name in self.videos_names:
-							if len(mask_frames_str) == 0:  # no matching frames in video
-								self.mask_frames[video_name] = np.array([], dtype=np.bool)
-							else:
-								mask_frames: List[str] = mask_frames_str.split(sep=",")
-								self.mask_frames[video_name] = np.array(mask_frames, dtype=np.int)
+                # init occlusions annotations
+                with open(mask_path, "r") as f:
+                    for line in f:
+                        line = line[:-1]
+                        video_name, mask_frames_str = line.split(sep="\t")
+                        if video_name in self.videos_names:
+                            if len(mask_frames_str) == 0:  # no matching frames in video
+                                self.mask_frames[video_name] = np.array([], dtype=np.bool)
+                            else:
+                                mask_frames: List[str] = mask_frames_str.split(sep=",")
+                                self.mask_frames[video_name] = np.array(mask_frames, dtype=np.int)
 
     def __getitem__(self, idx: int) -> Tuple[Tuple[torch.tensor, torch.tensor], Tuple[torch.tensor, torch.tensor], str]:
         self._init_dataset_if_not_initiated()
