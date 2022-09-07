@@ -187,8 +187,6 @@ def score_main(args):
 	image_dir_path = os.path.join("data", args.name, args.split)
 	gt_bbs_path = os.path.join("data", args.name , "{}_labels".format(args.split))
 
-	containments_path = os.path.join("data", args.name, "{}_containments".format(args.split))
-
 	bbs_path = os.path.join("results", args.name, args.setting, args.split)
 	#bbs_path = os.path.join("results", args.model_name, taskid)
 
@@ -368,7 +366,7 @@ def score_main(args):
 
 	c4c = a4c - b4c
 
-	print("{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}\t{:.3f}".format(b4c, b4i, b4m, a4c, a4i, a4m, c4c))
+	print(args.split, "{:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}".format(b4c, b4i, b4m, a4c, a4i, a4m, c4c))
 	#print("BEFORE CORRECT", b4c, b4i, b4m, "AFTER_CORRECT", a4c, a4i, a4m)
 
 	if args.split in ["control_almostreal", "threecup"]:
