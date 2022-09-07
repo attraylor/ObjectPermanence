@@ -73,7 +73,6 @@ def overlay_main(args):
 	image_dir_path = os.path.join("data", args.name)
 	gt_bbs_path = os.path.join("data", args.name + "_labels")
 	bbs_path = os.path.join("results", args.model_name)
-	print(image_dir_path, "||", gt_bbs_path, "||", bbs_path)
 
 	for d in os.listdir(image_dir_path):
 		subdir = os.path.join(image_dir_path, d)
