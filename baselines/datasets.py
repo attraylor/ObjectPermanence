@@ -7,6 +7,7 @@ from functools import cmp_to_key
 import numpy as np
 import torch
 from torch.utils.data import Dataset
+import os
 
 from object_indices import is_cone_object
 
@@ -531,7 +532,8 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
         # if not initiated
         if len(self.videos_names) == 0:
             super()._init_dataset_if_not_initiated(self.prefixes)
-
+            for prefix in self.prefixes:
+                p = os.path.join(self.mask_annotations_path, prefix, "masks.txt")
             # init occlusions annotations
             with open(self.mask_annotations_path, "r") as f:
                 for line in f:
