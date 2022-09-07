@@ -293,4 +293,5 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
 								"split": spl
 								}
                 score_ns = Namespace(**score_args)
+				#THERE ARE NO SUBDIRS FOR THIS ONE
                 score_main(score_ns)
