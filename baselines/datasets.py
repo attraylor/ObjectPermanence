@@ -572,7 +572,7 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
         objects: List[np.ndarray] = prediction_data["labels"]
-		if hasattr(self, "num_frames"):
+        if hasattr(self, "num_frames"):
             prediction_boxes = prediction_boxes[:self.num_frames]
             objects = objects[:self.num_frames]
 
