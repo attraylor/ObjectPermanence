@@ -35,7 +35,9 @@ def test_main(args):
 	for setting, checkpoints_path in expt_config.items():
 		model_name: str = "opnet"
 		model_path: str = get_best_model_from_folder(checkpoints_path)
-		model_config: str = "configs/smaller_opnet.json"
+		mcf: str = "configs/smaller_opnet.json"
+		with open(mcf) as rf:
+			model_config: str = json.open(rf)
 		model: nn.Module = ModelsFactory.get_model(model_name, model_config, model_path)
 		for spl in splits:
 			fd2 = Path(checkpoints_path) / "test_frames" / spl
