@@ -64,6 +64,7 @@ def test_main(args):
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser(description='run tests over many different models')
 	parser.add_argument("--expt_config")
-
+	parser.add_argument("--splits")
+	parser.add_argument("--name")
 	args = parser.parse_args()
 	test_main(args)
