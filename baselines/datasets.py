@@ -612,7 +612,7 @@ class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDatas
         if hasattr(self, "num_frames"):
             prediction_boxes = prediction_boxes[:self.num_frames]
             objects = objects[:self.num_frames]
-
+        print(len(prediction_boxes))
         # normalize relative to frames dimensions
         # add padding where number of objects is smaller then the maximum
         prediction_boxes = self._normalize_and_pad_predictions(prediction_boxes, objects)

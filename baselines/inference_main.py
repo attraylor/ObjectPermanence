@@ -319,7 +319,6 @@ def modified_inference_main(model, model_name: str, results_dir: str, samples_di
             dataset_predictions.extend(batch_predictions)
             dataset_labels.extend(batch_labels)
             current_sample_idx += current_batch_size
-    print(np.array(dataset_predictions).shape)
     dataset_predictions = (np.array(dataset_predictions) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
     dataset_labels = (np.array(dataset_labels) * frame_shapes).reshape((dataset_length, num_frames, 4)).astype(np.int32)
 
