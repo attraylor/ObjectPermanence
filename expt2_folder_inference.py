@@ -1,4 +1,5 @@
 import os
+import json
 from baselines.inference_main import modified_inference_main
 
 from plinko_imports.overlay_bbs_inference_folder import overlay_main
@@ -19,7 +20,9 @@ def get_best_model_from_folder(folder_fp):
 	return bmp
 
 def test_main(args):
-	expt_config = args.expt_config #Dictionary mapping setting : path to checkpoint.
+	ecf = args.expt_config #Dictionary mapping setting : path to checkpoint.
+	with open(ecf) as rf:
+		expt_config = json.load(rf)
 	splits = args.splits.split(",") #the different tests we will be running
 	name = args.name #the name of the data (eg template_data_v10)
 	batch_size = 2
