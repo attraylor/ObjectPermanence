@@ -10,6 +10,7 @@ import sys
 sys.path = ["/users/atraylor/anaconda/OP/lib/python3.7/site-packages"] + sys.path
 
 def get_best_model_from_folder(folder_fp):
+	print(folder_fp)
 	if "best_model.pth" in os.listdir(folder_fp):
 		bmp = os.path.join(folder_fp, "best_model.pth")
 	else:
