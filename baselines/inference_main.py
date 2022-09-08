@@ -181,7 +181,7 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
     print(samples_dir)
     print(labels_dir)
 
-    dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir)
+    dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir, num_frames)
     data_loader = data.DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
     dataset_length = len(dataset)
 
@@ -278,7 +278,7 @@ def reasoning_inference_main(model_name: str, results_dir: str, inference_config
 
 def modified_inference_main(model, model_name: str, results_dir: str, samples_dir: str, 
 							labels_dir: str, batch_size: int, num_workers: int, device: str, num_frames: int):
-    dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir)
+    dataset: data.Dataset = DatasetsFactory.get_inference_dataset(model_name, samples_dir, labels_dir, num_frames)
     data_loader = data.DataLoader(dataset, batch_size=batch_size, num_workers=num_workers)
     dataset_length = len(dataset)
 

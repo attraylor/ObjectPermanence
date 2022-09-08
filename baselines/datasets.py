@@ -591,7 +591,7 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
 
 class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDataset):
-    def __init__(self, predictions_dir: str, label_dir: str):
+    def __init__(self, predictions_dir: str, label_dir: str, num_frames: int):
         super().__init__(predictions_dir, label_dir)
        #self.prefixes = prefixes
 
