@@ -379,12 +379,12 @@ def score_main(args):
 	print(args.split, "{:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}".format(b4c, b4i, b4m, a4c, a4i, a4m, c4c))
 	#print("BEFORE CORRECT", b4c, b4i, b4m, "AFTER_CORRECT", a4c, a4i, a4m)
 
-	if args.split in ["control_almostreal", "threecup"]:
+	"""if args.split in ["control_almostreal", "threecup"]:
 		with open(write_path) as rf:
 			data = json.load(rf)
 		df = pd.DataFrame(data)
 		print(df.groupby(["before_or_after", "config_type"])["score"].value_counts() / df.groupby(["before_or_after", "config_type"])["score"].count())
-
+	"""
 	return acc_avg, score_pairs, acc_dict
 
 if __name__ == "__main__":
