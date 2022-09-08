@@ -572,6 +572,9 @@ class Cater6TracksForObjectsTrainingDataset(CaterAbstract6TracksForObjectsDatase
 
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
         objects: List[np.ndarray] = prediction_data["labels"]
+		if hasattr(self, "num_frames"):
+            prediction_boxes = prediction_boxes[:self.num_frames]
+            objects = objects[:self.num_frames]
 
         # normalize relative to frames dimensions
         # add padding where number of objects is smaller then the maximum
@@ -606,6 +609,9 @@ class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDatas
 
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
         objects: List[np.ndarray] = prediction_data["labels"]
+        if hasattr(self, "num_frames"):
+            prediction_boxes = prediction_boxes[:self.num_frames]
+            objects = objects[:self.num_frames]
 
         # normalize relative to frames dimensions
         # add padding where number of objects is smaller then the maximum
