@@ -603,6 +603,7 @@ class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDatas
 
         # load labels
         snitch_labels: np.ndarray = self._load_snitch_labels_for_video(video_name)
+        snitch_labels = snitch_labels[:self.num_frames]
 
         # load predictions
         video_predictions_path = str(self.predictions_dir / (video_name + ".pkl"))
