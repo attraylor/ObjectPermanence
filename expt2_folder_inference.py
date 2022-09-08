@@ -32,6 +32,8 @@ def test_main(args):
 	device="cuda:0"
 	model_name = "opnet"
 	num_frames = 57
+	total_scores = []
+	total_results = []
 	for setting, checkpoints_path in expt_config.items():
 		model_name: str = "opnet"
 		model_path: str = get_best_model_from_folder(checkpoints_path)
@@ -67,8 +69,17 @@ def test_main(args):
 							}
 			score_ns = argparse.Namespace(**score_args)
 			#THERE ARE NO SUBDIRS FOR THIS ONE
-			score_main(score_ns)
-
+			_, all_scores, results = score_main(score_ns)
+			results["setting"] = setting
+			results["split"] = spl
+			total_scores += all_scores
+			total_results += results
+	if not os.path.exists(args.results_dir):
+		os.makedirs(args.results_dir)
+	with open(os.path.join(args.results_dir, "per_example_scores.json"), "w+") as wf:
+		json.dump(total_scores, wf, indent=4)
+	with open(os.path.join(args.results_dir, "per_experiment_scores.json"), "w+") as wf:
+		json.dump(total_results, wf, indent=4)
 
 
 if __name__ == "__main__":
@@ -76,5 +87,6 @@ if __name__ == "__main__":
 	parser.add_argument("--expt_config")
 	parser.add_argument("--splits")
 	parser.add_argument("--name")
+	parser.add_argument("--results_dir")
 	args = parser.parse_args()
 	test_main(args)

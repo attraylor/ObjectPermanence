@@ -366,6 +366,16 @@ def score_main(args):
 
 	c4c = a4c - b4c
 
+	acc_dict = {
+		"before_correct": b4c,
+		"before_incorrect:": b4i,
+		"before_missing": b4m,
+		"after_correct": a4c,
+		"after_incorrect": a4i,
+		"after_missing": a4m,
+		"change": c4c
+	}
+
 	print(args.split, "{:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}\t{:.3f}\t{:.3f}  ||  {:.3f}".format(b4c, b4i, b4m, a4c, a4i, a4m, c4c))
 	#print("BEFORE CORRECT", b4c, b4i, b4m, "AFTER_CORRECT", a4c, a4i, a4m)
 
@@ -375,7 +385,7 @@ def score_main(args):
 		df = pd.DataFrame(data)
 		print(df.groupby(["before_or_after", "config_type"])["score"].value_counts() / df.groupby(["before_or_after", "config_type"])["score"].count())
 
-	return acc_avg
+	return acc_avg, score_pairs, acc_dict
 
 if __name__ == "__main__":
 	parser = argparse.ArgumentParser()
