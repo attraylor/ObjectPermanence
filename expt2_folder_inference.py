@@ -6,6 +6,8 @@ from plinko_imports.overlay_bbs_inference_folder import overlay_main
 from plinko_imports.score_above_occluder import score_main
 from pathlib import Path
 import argparse
+import torch.nn as nn
+from baselines.models_factory import ModelsFactory
 import sys
 sys.path = ["/users/atraylor/anaconda/OP/lib/python3.7/site-packages"] + sys.path
 
@@ -17,7 +19,6 @@ def get_best_model_from_folder(fp, model_name="opnet"):
 		i_and_f = [(int(f.split("_")[0]), os.path.join(folder_fp, f)) for f in os.listdir(folder_fp) if f.split("_")[0].isdigit()]
 		i_and_f.sort(reverse=True)
 		bmp = i_and_f[0][1]
-	print(bmp)
 	return bmp
 
 def test_main(args):
@@ -32,7 +33,10 @@ def test_main(args):
 	model_name = "opnet"
 	num_frames = 57
 	for setting, checkpoints_path in expt_config.items():
-		model = get_best_model_from_folder(checkpoints_path)
+		model_name: str = "opnet"
+		model_path: str = get_best_model_from_folder(checkpoints_path)
+		model_config: str = os.path.join("data/worser/v10", "{}.json".format(setting))
+		model: nn.Module = ModelsFactory.get_model(model_name, model_config, model_path)
 		for spl in splits:
 			fd2 = Path(checkpoints_path) / "test_frames" / spl
 			vd2 = Path(checkpoints_path) / "test_videos" / spl
