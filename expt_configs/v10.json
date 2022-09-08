@@ -1,0 +1,10 @@
+{
+	"id": "./checkpoints/template_data_v10/id/09-07-22--16-08-59",
+	"sp_tct": "./checkpoints/template_data_v10/sp_tct/09-07-22--16-46-37",
+	"sp_tct_id": "./checkpoints/template_data_v10/sp_tct_id/09-07-22--17-00-08",
+	"sp_tcr": "./checkpoints/template_data_v10/sp_tcr/09-07-22--17-00-08",
+	"tcr": "./checkpoints/template_data_v10/tcr/09-07-22--17-00-08",
+	"tct_id": "./checkpoints/template_data_v10/tct_id/09-07-22--17-00-08",
+	"idfull": "./checkpoints/template_data_v10/idfull/09-07-22--22-42-26", 
+	"tct_idfull": "./checkpoints/template_data_v10/tct_idfull/09-07-22--22-42-26"
+}
