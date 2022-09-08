@@ -610,9 +610,11 @@ class Cater6TracksForObjectsInferenceDataset(CaterAbstract6TracksForObjectsDatas
         prediction_boxes: List[np.ndarray] = prediction_data["bb"]
         objects: List[np.ndarray] = prediction_data["labels"]
         if hasattr(self, "num_frames"):
+            print("blah")
             prediction_boxes = prediction_boxes[:self.num_frames]
             objects = objects[:self.num_frames]
         print(len(prediction_boxes))
+        sys.exit(1)
         # normalize relative to frames dimensions
         # add padding where number of objects is smaller then the maximum
         prediction_boxes = self._normalize_and_pad_predictions(prediction_boxes, objects)
