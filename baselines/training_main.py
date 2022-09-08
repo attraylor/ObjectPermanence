@@ -37,7 +37,9 @@ def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoi
 
     # save the model to dict
     checkpoint_file = checkpoint_path / f"{epoch_num}_{current_date}_{dev_loss}.pth"
+    best_model = checkpoint_path / "best_model.pth"
     torch.save(model.state_dict(), checkpoint_file)
+    torch.save(model.state_dict(), best_model)
     print(f"Saved best model so far on dev set with type {model_name} and performance loss of: {dev_loss}")
 
 
