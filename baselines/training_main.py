@@ -11,6 +11,7 @@ import torch.nn as nn
 from torch.utils import data
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from argparse import Namespace
+import json
 
 
 import os
@@ -28,7 +29,7 @@ NUM_FRAMES = 66#25#38#25 #300
 FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
 
 
-def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int) -> None:
+def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int, loss_hist: list) -> None:
     current_date = datetime.now().strftime("%m-%d-%y--%H-%M-%S")
 
     # create checkpoint folder if it doesn't exist
@@ -40,6 +41,8 @@ def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoi
     best_model = checkpoint_path / "best_model.pth"
     torch.save(model.state_dict(), checkpoint_file)
     torch.save(model.state_dict(), best_model)
+    with open(os.path.join(checkpoint_path, "loss_hist.json"), "w+") as wf:
+        json.dump(loss_hist, wf, indent=4)
     print(f"Saved best model so far on dev set with type {model_name} and performance loss of: {dev_loss}")
 
 
@@ -130,7 +133,7 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
         return average_loss, mean_iou, containment_mean_iou
 
 
-def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, name: str, setting: str, splits: list, prefixes: list = []):
+def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, name: str, setting: str, splits: list, prefixes: list = [], save_all = False):
 
     # create train and dev datasets using the files specified in the training configuration
     train_samples_dir = train_config["train_sample_dir"]
@@ -173,12 +176,13 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     train_inference_loader = data.DataLoader(train_dataset, **inference_config_dict)
     dev_loader = data.DataLoader(dev_dataset, **inference_config_dict)
 
-	
+    
 
     # Start training
     model = model.to(device)
     lowest_dev_loss: float = 100000
     train_start_time = time.time()
+    loss_hist = []
 
     for epoch in range(num_epochs):
         model.train(mode=True)
@@ -262,38 +266,39 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
 
         # learning rate scheduling
         scheduler.step(train_loss)
-
+        loss_hist.append(dev_loss)
         # check if it is the best performing model so far and save it
-        if dev_loss < lowest_dev_loss:
-            lowest_dev_loss = dev_loss
+        if save_all == True or dev_loss < lowest_dev_loss:
             #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
-            save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch)
-            for spl in splits:
-                fd2 = Path(checkpoints_path) / "best_frames" / spl
-                vd2 = Path(checkpoints_path) / "best_videos" / spl
-                fd2.mkdir(parents=True, exist_ok=True)
-                vd2.mkdir(parents=True, exist_ok=True)
-                results_dir = "results/{}/{}/{}".format(name, setting, spl)
-                data_head, _ = os.path.split(train_samples_dir)
-                inf_samples_dir = os.path.join(data_head, spl)
-                inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
-                modified_inference_main(model, model_name, results_dir, inf_samples_dir, inf_labels_dir, 
-											batch_size, num_workers, device, num_frames)
-				#python ../plinko/src/overlay_bbs_inference_folder.py --name "${name}/${split}" --frames_dir "vid_out/frames/${name}/${setting}/${split}" --video_dir "vid_out/videos/${name}/${setting}/${split}" --model_name "${name}/${setting}/${split}/"
-                overlay_args = {
-								"name": "{}/{}".format(name, spl),
-								"frames_dir": fd2,
-								"video_dir": vd2,
-								"model_name": "{}/{}/{}/".format(name, setting, spl),
-								}
-                overlay_ns = Namespace(**overlay_args)
+            save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch, loss_hist)
+            if dev_loss < lowest_dev_loss:
+                lowest_dev_loss = dev_loss
+                for spl in splits:
+                    fd2 = Path(checkpoints_path) / "best_frames" / spl
+                    vd2 = Path(checkpoints_path) / "best_videos" / spl
+                    fd2.mkdir(parents=True, exist_ok=True)
+                    vd2.mkdir(parents=True, exist_ok=True)
+                    results_dir = "results/{}/{}/{}".format(name, setting, spl)
+                    data_head, _ = os.path.split(train_samples_dir)
+                    inf_samples_dir = os.path.join(data_head, spl)
+                    inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
+                    modified_inference_main(model, model_name, results_dir, inf_samples_dir, inf_labels_dir, 
+                                                batch_size, num_workers, device, num_frames)
+                    #python ../plinko/src/overlay_bbs_inference_folder.py --name "${name}/${split}" --frames_dir "vid_out/frames/${name}/${setting}/${split}" --video_dir "vid_out/videos/${name}/${setting}/${split}" --model_name "${name}/${setting}/${split}/"
+                    overlay_args = {
+                                    "name": "{}/{}".format(name, spl),
+                                    "frames_dir": fd2,
+                                    "video_dir": vd2,
+                                    "model_name": "{}/{}/{}/".format(name, setting, spl),
+                                    }
+                    overlay_ns = Namespace(**overlay_args)
 
-                overlay_main(overlay_ns)
-                score_args = {
-								"name": name,
-								"setting": setting,
-								"split": spl
-								}
-                score_ns = Namespace(**score_args)
-				#THERE ARE NO SUBDIRS FOR THIS ONE
+                    overlay_main(overlay_ns)
+                    score_args = {
+                                    "name": name,
+                                    "setting": setting,
+                                    "split": spl
+                                    }
+                    score_ns = Namespace(**score_args)
+                #THERE ARE NO SUBDIRS FOR THIS ONE
                 
