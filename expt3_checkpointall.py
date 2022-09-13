@@ -38,7 +38,7 @@ def test_main(args):
 
 	setting = args.setting
 
-	folder_fp = os.path.join(args.checkpoint_path, model_name)
+	folder_fp = os.path.join(args.checkpoints_path, model_name)
 	i_and_f = [(int(f.split("_")[0]), os.path.join(folder_fp, f)) for f in os.listdir(folder_fp) if f.split("_")[0].isdigit()]
 	i_and_f.sort()
 
