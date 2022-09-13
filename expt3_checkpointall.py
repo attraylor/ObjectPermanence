@@ -74,7 +74,7 @@ def test_main(args):
 			results["setting"] = setting
 			results["split"] = spl
 			total_scores += all_scores
-			total_results += results
+			total_results.append(results)
 	if not os.path.exists(args.results_dir):
 		os.makedirs(args.results_dir)
 	with open(os.path.join(args.results_dir, "{}_longterm_scores.json".format(setting)), "w+") as wf:

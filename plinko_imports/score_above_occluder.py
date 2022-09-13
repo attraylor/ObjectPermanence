@@ -368,7 +368,7 @@ def score_main(args):
 
 	acc_dict = {
 		"before_correct": b4c,
-		"before_incorrect:": b4i,
+		"before_incorrect": b4i,
 		"before_missing": b4m,
 		"after_correct": a4c,
 		"after_incorrect": a4i,
