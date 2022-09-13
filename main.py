@@ -60,6 +60,8 @@ if __name__ == '__main__':
                                   help="test names, split on comma")
     training_parser.add_argument("--save_all", action="store_true",
                                   help="if true, save every model")
+    training_parser.add_argument("--pretrained_model", type=str, default=None,
+                                  help="pretrained model to load from")
 
     # create a parser for offline results analysis
     analysis_parser = subparsers.add_parser('analysis')
@@ -139,7 +141,9 @@ if __name__ == '__main__':
 
         splits = args.splits.split(",")
 
-        training_main(model_type, train_config, model_config, args.num_frames, args.name, args.setting, splits, prefixes, args.save_all)
+        training_main(model_type, train_config, model_config, args.num_frames, 
+					args.name, args.setting, splits, prefixes, args.save_all,
+					args.pretrained_model)
 
     if mode == "analysis":
         predictions_dir = args.predictions_dir

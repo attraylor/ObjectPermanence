@@ -133,7 +133,9 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
         return average_loss, mean_iou, containment_mean_iou
 
 
-def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], num_frames: int, name: str, setting: str, splits: list, prefixes: list = [], save_all = False):
+def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], 
+					num_frames: int, name: str, setting: str, splits: list, prefixes: list = [], 
+					save_all = False, pretrained_model = None):
 
     # create train and dev datasets using the files specified in the training configuration
     train_samples_dir = train_config["train_sample_dir"]
@@ -163,8 +165,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     # consistency_rate = train_config["consistency_rate"]
 
     # model, loss and optimizer
-    model: nn.Module = ModelsFactory.get_model(model_name, model_config)
-
+    model: nn.Module = ModelsFactory.get_model(model_name, model_config, pretrained_model)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=scheduler_factor, patience=scheduler_patience, verbose=True)
     loss_function = nn.L1Loss(reduction="none")
