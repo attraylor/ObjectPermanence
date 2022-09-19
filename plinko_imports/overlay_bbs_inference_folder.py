@@ -72,7 +72,7 @@ def make_frames(image_dir_path, gt_bbs_fp, bbs_path, d, out_dir):
 def overlay_main(args):
 	image_dir_path = os.path.join("data", args.name)
 	gt_bbs_path = os.path.join("data", args.name + "_labels")
-	bbs_path = os.path.join("results", args.model_name)
+	bbs_path = args.results_dir
 
 	for d in os.listdir(image_dir_path):
 		subdir = os.path.join(image_dir_path, d)

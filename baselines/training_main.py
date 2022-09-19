@@ -291,6 +291,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
                                     "frames_dir": fd2,
                                     "video_dir": vd2,
                                     "model_name": "{}/{}/{}/".format(name, setting, spl),
+									"results_dir": results_dir,
                                     }
                     overlay_ns = Namespace(**overlay_args)
 
