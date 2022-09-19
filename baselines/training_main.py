@@ -135,7 +135,7 @@ def inference_and_iou_comp(model_name: str, model: nn.Module, compute_device: to
 
 def training_main(model_name: str, train_config: Dict[str, Any], model_config: Dict[str, int], 
 					num_frames: int, name: str, setting: str, splits: list, prefixes: list = [], 
-					save_all = False, pretrained_model = None):
+					save_all = False, pretrained_model = None, taskid="1"):
 
     # create train and dev datasets using the files specified in the training configuration
     train_samples_dir = train_config["train_sample_dir"]
@@ -158,7 +158,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     inference_batch_size = train_config["inference_batch_size"]
     scheduler_patience = train_config["lr_scheduler_patience"]
     scheduler_factor = train_config["lr_scheduler_factor"]
-    checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S"))
+    checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S") + str(taskid))
     print("CHECKPOINT PATH")
     print(checkpoints_path)
     device = torch.device(train_config["device"])
