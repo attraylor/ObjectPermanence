@@ -12,6 +12,8 @@ import sys
 sys.path = ["/users/atraylor/anaconda/OP/lib/python3.7/site-packages"] + sys.path
 
 def get_best_model_from_folder(fp, model_name="opnet"):
+	if ".pth" in fp:
+		return fp
 	folder_fp = os.path.join(fp, model_name)
 	if "best_model.pth" in os.listdir(folder_fp):
 		bmp = os.path.join(folder_fp, "best_model.pth")
