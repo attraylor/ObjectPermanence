@@ -158,7 +158,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     inference_batch_size = train_config["inference_batch_size"]
     scheduler_patience = train_config["lr_scheduler_patience"]
     scheduler_factor = train_config["lr_scheduler_factor"]
-    checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S") + str(taskid))
+    checkpoints_path = os.path.join(train_config["checkpoints_path"], datetime.now().strftime("%m-%d-%y--%H-%M-%S") + "-" + str(taskid))
     print("CHECKPOINT PATH")
     print(checkpoints_path)
     device = torch.device(train_config["device"])
