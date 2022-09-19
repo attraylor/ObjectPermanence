@@ -279,7 +279,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
                     vd2 = Path(checkpoints_path) / "best_videos" / spl
                     fd2.mkdir(parents=True, exist_ok=True)
                     vd2.mkdir(parents=True, exist_ok=True)
-                    results_dir = "results/{}/{}/{}".format(name, setting, spl)
+                    results_dir = Path(checkpoints_path) / "interim_bbs"
                     data_head, _ = os.path.split(train_samples_dir)
                     inf_samples_dir = os.path.join(data_head, spl)
                     inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
