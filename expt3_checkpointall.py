@@ -56,7 +56,7 @@ def test_main(args):
 			vd2 = Path(args.checkpoints_path) / "test_videos" / spl
 			fd2.mkdir(parents=True, exist_ok=True)
 			vd2.mkdir(parents=True, exist_ok=True)
-			results_dir = "results/{}/{}/{}".format(name, setting, spl)
+			results_dir = Path(args.checkpoints_path) / "interim_bbs"#"results/{}/{}/{}".format(name, setting, spl)
 			data_head = os.path.join("data", name)
 			inf_samples_dir = os.path.join(data_head, spl)
 			inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
@@ -66,7 +66,8 @@ def test_main(args):
 			score_args = {
 							"name": name,
 							"setting": setting,
-							"split": spl
+							"split": spl,
+							"results_dir": results_dir,
 							}
 			score_ns = argparse.Namespace(**score_args)
 			#THERE ARE NO SUBDIRS FOR THIS ONE
