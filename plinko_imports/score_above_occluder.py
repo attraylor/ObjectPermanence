@@ -173,8 +173,8 @@ CRITICAL_FRAMES = {
 	"twocup_freebie" : [33, 46],
 	"threecup" : [33, 46],
 	"id_control": [41,46],
-	"id_roll_outside_in": [57,63],
-	"id_roll_inside_out": [57,63],
+	"roll_behind_occluder_easy": [41,47],
+	"roll_behind_occluder_hard": [41,47],
 	"id_roll_viz": [57,63],
 	"test": [41,46],
 }
