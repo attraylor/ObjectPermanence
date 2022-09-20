@@ -60,6 +60,7 @@ def test_main(args):
 							"frames_dir": fd2,
 							"video_dir": vd2,
 							"model_name": "{}/{}/{}/".format(name, setting, spl),
+							"results_dir": results_dir
 							}
 			overlay_ns = argparse.Namespace(**overlay_args)
 
@@ -68,7 +69,6 @@ def test_main(args):
 							"name": name,
 							"setting": setting,
 							"split": spl,
-							"results_dir": results_dir
 							}
 			score_ns = argparse.Namespace(**score_args)
 			#THERE ARE NO SUBDIRS FOR THIS ONE
