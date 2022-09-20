@@ -29,7 +29,7 @@ NUM_FRAMES = 66#25#38#25 #300
 FRAME_SHAPES = [160, 120, 160, 120]#[320, 240, 320, 240]
 
 
-def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int, loss_hist: list) -> None:
+def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoint_dir: str, epoch_num: int, loss_hist: list, save_best : bool) -> None:
     current_date = datetime.now().strftime("%m-%d-%y--%H-%M-%S")
 
     # create checkpoint folder if it doesn't exist
@@ -38,7 +38,8 @@ def save_checkpoint(model: nn.Module, model_name: str, dev_loss: float, checkpoi
 
     # save the model to dict
     checkpoint_file = checkpoint_path / f"{epoch_num}_{current_date}_{dev_loss}.pth"
-    best_model = checkpoint_path / "best_model.pth"
+    if save_best:
+        best_model = checkpoint_path / "best_model.pth"
     torch.save(model.state_dict(), checkpoint_file)
     torch.save(model.state_dict(), best_model)
     with open(os.path.join(checkpoint_path, "loss_hist.json"), "w+") as wf:
@@ -271,7 +272,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
         # check if it is the best performing model so far and save it
         if save_all == True or dev_loss < lowest_dev_loss:
             #save_checkpoint(model, model_name, round(highest_dev_iou, 3), checkpoints_path)
-            save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch, loss_hist)
+            save_checkpoint(model, model_name, dev_loss, checkpoints_path, epoch, loss_hist, save_best=dev_loss < lowest_dev_loss)
             if dev_loss < lowest_dev_loss:
                 lowest_dev_loss = dev_loss
                 for spl in splits:
