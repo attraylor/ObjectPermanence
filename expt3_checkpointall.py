@@ -91,6 +91,6 @@ if __name__ == "__main__":
 	parser.add_argument("--setting")
 	parser.add_argument("--name")
 	parser.add_argument("--results_dir")
-	parser.add_argument("--max_epochs")
+	parser.add_argument("--max_epochs",type=int)
 	args = parser.parse_args()
 	test_main(args)
