@@ -71,8 +71,9 @@ def test_main(args):
 			_, all_scores, results = score_main(score_ns)
 			results["setting"] = setting
 			results["split"] = spl
-			total_scores += all_scores
+			total_scores += [all_scores]
 			total_results.append(results)
+		
 	if not os.path.exists(args.results_dir):
 		os.makedirs(args.results_dir)
 	with open(os.path.join(args.results_dir, "{}_longterm_scores.json".format(setting)), "w+") as wf:
@@ -88,5 +89,6 @@ if __name__ == "__main__":
 	parser.add_argument("--setting")
 	parser.add_argument("--name")
 	parser.add_argument("--results_dir")
+	parser.add_argument("--max_epochs")
 	args = parser.parse_args()
 	test_main(args)
