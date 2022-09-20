@@ -69,6 +69,7 @@ def test_main(args):
 							"name": name,
 							"setting": setting,
 							"split": spl,
+							"results_dir": results_dir,
 							}
 			score_ns = argparse.Namespace(**score_args)
 			#THERE ARE NO SUBDIRS FOR THIS ONE

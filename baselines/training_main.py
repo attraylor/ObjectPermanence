@@ -299,7 +299,8 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
                     score_args = {
                                     "name": name,
                                     "setting": setting,
-                                    "split": spl
+                                    "split": spl,
+									"results_dir": results_dir,
                                     }
                     score_ns = Namespace(**score_args)
                 #THERE ARE NO SUBDIRS FOR THIS ONE

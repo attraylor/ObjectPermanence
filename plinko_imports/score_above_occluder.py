@@ -187,7 +187,7 @@ def score_main(args):
 	image_dir_path = os.path.join("data", args.name, args.split)
 	gt_bbs_path = os.path.join("data", args.name , "{}_labels".format(args.split))
 
-	bbs_path = os.path.join("results", args.name, args.setting, args.split)
+	bbs_path = args.results_dir#os.path.join("results", args.name, args.setting, args.split)
 	#bbs_path = os.path.join("results", args.model_name, taskid)
 
 	write_dir = os.path.join("scores", args.name, args.setting, args.split)
