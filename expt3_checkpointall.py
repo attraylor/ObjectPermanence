@@ -44,6 +44,8 @@ def test_main(args):
 
 	split_to_hist = defaultdict(list)
 	for i, model_path in i_and_f:
+		if i > args.max_epochs:
+			continue
 		model_name: str = "opnet"
 		mcf: str = "configs/smaller_opnet.json"
 		with open(mcf) as rf:
