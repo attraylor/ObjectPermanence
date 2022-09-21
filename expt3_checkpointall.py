@@ -9,7 +9,7 @@ import argparse
 import torch.nn as nn
 from baselines.models_factory import ModelsFactory
 import sys
-
+import subprocess
 from collections import defaultdict
 
 
@@ -52,10 +52,6 @@ def test_main(args):
 			model_config: str = json.load(rf)
 		model: nn.Module = ModelsFactory.get_model(model_name, model_config, model_path)
 		for spl in splits:
-			fd2 = Path(args.checkpoints_path) / "test_frames" / spl
-			vd2 = Path(args.checkpoints_path) / "test_videos" / spl
-			fd2.mkdir(parents=True, exist_ok=True)
-			vd2.mkdir(parents=True, exist_ok=True)
 			results_dir = Path(args.checkpoints_path) / "interim_bbs"#"results/{}/{}/{}".format(name, setting, spl)
 			data_head = os.path.join("data", name)
 			inf_samples_dir = os.path.join(data_head, spl)
@@ -76,6 +72,23 @@ def test_main(args):
 			results["split"] = spl
 			total_scores += [all_scores]
 			total_results.append(results)
+			if args.save_videos == True:
+				fd2 = Path(args.checkpoints_path) / "test_frames" / spl / i
+				vd2 = Path(args.checkpoints_path) / "test_videos" / spl / i
+				fd2.mkdir(parents=True, exist_ok=True)
+				vd2.mkdir(parents=True, exist_ok=True)
+				
+				overlay_args = {
+								"name": "{}/{}".format(name, spl),
+								"frames_dir": fd2,
+								"video_dir": vd2,
+								"model_name": "{}/{}/{}/".format(name, setting, spl),
+								"results_dir": results_dir,
+								}
+				overlay_ns = argparse.Namespace(**overlay_args)
+
+				overlay_main(overlay_ns)
+				subprocess.run("rm -f {}/*.png".format(fd2), shell=True)
 		
 	if not os.path.exists(args.results_dir):
 		os.makedirs(args.results_dir)
@@ -93,5 +106,6 @@ if __name__ == "__main__":
 	parser.add_argument("--name")
 	parser.add_argument("--results_dir")
 	parser.add_argument("--max_epochs",type=int)
+	parser.add_argument("--save_videos", action="store_true")
 	args = parser.parse_args()
 	test_main(args)
