@@ -73,8 +73,8 @@ def test_main(args):
 			total_scores += [all_scores]
 			total_results.append(results)
 			if args.save_videos == True:
-				fd2 = Path(args.checkpoints_path) / "test_frames" / spl / i
-				vd2 = Path(args.checkpoints_path) / "test_videos" / spl / i
+				fd2 = Path(args.checkpoints_path) / "test_frames" / spl / str(i)
+				vd2 = Path(args.checkpoints_path) / "test_videos" / spl / str(i)
 				fd2.mkdir(parents=True, exist_ok=True)
 				vd2.mkdir(parents=True, exist_ok=True)
 				
