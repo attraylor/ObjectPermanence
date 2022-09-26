@@ -54,6 +54,7 @@ def test_main(args):
 				data_head = os.path.join(data_head, args.name2)
 			inf_samples_dir = os.path.join(data_head, spl)
 			inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
+			print(inf_labels_dir, inf_samples_dir)
 			modified_inference_main(model, model_name, results_dir, inf_samples_dir, inf_labels_dir, 
 										batch_size, num_workers, device, num_frames)
 			#python ../plinko/src/overlay_bbs_inference_folder.py --name "${name}/${split}" --frames_dir "vid_out/frames/${name}/${setting}/${split}" --video_dir "vid_out/videos/${name}/${setting}/${split}" --model_name "${name}/${setting}/${split}/"
