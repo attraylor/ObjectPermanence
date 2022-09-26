@@ -50,8 +50,8 @@ def test_main(args):
 			vd2.mkdir(parents=True, exist_ok=True)
 			results_dir = Path(checkpoints_path) / "interim_bbs"
 			data_head = os.path.join("data", name)
-			if hasattr(args, "name2"):
-				data_head = os.path.join(data_head, args.name2)
+			#if hasattr(args, "name2"):
+			#	data_head = os.path.join(data_head, args.name2)
 			inf_samples_dir = os.path.join(data_head, spl)
 			inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
 			print(inf_labels_dir, inf_samples_dir)
