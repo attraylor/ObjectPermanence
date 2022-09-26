@@ -39,7 +39,7 @@ def test_main(args):
 	for setting, checkpoints_path in expt_config.items():
 		model_name: str = "opnet"
 		model_path: str = get_best_model_from_folder(checkpoints_path)
-		mcf: str = "configs/smaller_opnet.json"
+		mcf: str = args.model_config
 		with open(mcf) as rf:
 			model_config: str = json.load(rf)
 		model: nn.Module = ModelsFactory.get_model(model_name, model_config, model_path)
@@ -50,6 +50,8 @@ def test_main(args):
 			vd2.mkdir(parents=True, exist_ok=True)
 			results_dir = Path(checkpoints_path) / "interim_bbs"
 			data_head = os.path.join("data", name)
+			if hasattr(args, "name2"):
+				data_head = os.path.join(data_head, args.name2)
 			inf_samples_dir = os.path.join(data_head, spl)
 			inf_labels_dir = os.path.join(data_head, "{}_labels".format(spl))
 			modified_inference_main(model, model_name, results_dir, inf_samples_dir, inf_labels_dir, 
@@ -91,6 +93,9 @@ if __name__ == "__main__":
 	parser.add_argument("--expt_config")
 	parser.add_argument("--splits")
 	parser.add_argument("--name")
+	parser.add_argument("--name2")
 	parser.add_argument("--results_dir")
+	parser.add_argument("--model_config", default="configs/smaller_opnet.json")
+	parser.add_argument("--num_lstms", default=1, type=int)
 	args = parser.parse_args()
 	test_main(args)
