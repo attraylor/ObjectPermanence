@@ -166,6 +166,7 @@ def training_main(model_name: str, train_config: Dict[str, Any], model_config: D
     # consistency_rate = train_config["consistency_rate"]
 
     # model, loss and optimizer
+	print("model config", model_config)
     model: nn.Module = ModelsFactory.get_model(model_name, model_config, pretrained_model)
     optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate)
     scheduler = ReduceLROnPlateau(optimizer, mode='min', factor=scheduler_factor, patience=scheduler_patience, verbose=True)
