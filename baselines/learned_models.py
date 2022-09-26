@@ -24,12 +24,12 @@ class OPNet(AbstractCaterModel):
         object_to_track_lstm_in_dim = self.bb_in_dim * 15
         object_to_track_lstm_hidden_dim = config["object_to_track_hidden_dim"]
         video_lstm_hidden_dim: int = config["videos_hidden_dim"]
-
+        num_lstms: int = config.get("num_lstms", 1)
         # self.boxes_linear = nn.Linear(in_features=self.bb_in_dim, out_features=boxes_features_dim, bias=False)
-        self.object_to_track_LSTM = nn.LSTM(input_size=object_to_track_lstm_in_dim, hidden_size=object_to_track_lstm_hidden_dim, num_layers=1, bidirectional=False, batch_first=True, bias=False)
+        self.object_to_track_LSTM = nn.LSTM(input_size=object_to_track_lstm_in_dim, hidden_size=object_to_track_lstm_hidden_dim, num_layers=num_lstms, bidirectional=False, batch_first=True, bias=False)
         self.object_to_track_prediction = nn.Linear(in_features=object_to_track_lstm_hidden_dim, out_features=object_to_track_dim, bias=False)
 
-        self.video_LSTM = nn.LSTM(input_size=self.bb_in_dim, hidden_size=video_lstm_hidden_dim, num_layers=1, bidirectional=False, batch_first=True, bias=False)
+        self.video_LSTM = nn.LSTM(input_size=self.bb_in_dim, hidden_size=video_lstm_hidden_dim, num_layers=num_lstms, bidirectional=False, batch_first=True, bias=False)
         self.prediction_layer = nn.Linear(in_features=video_lstm_hidden_dim, out_features=self.bb_out_dim, bias=False)
 
     def forward(self, boxes: torch.tensor) -> torch.tensor:
