@@ -36,13 +36,15 @@ def test_main(args):
 	num_frames = 57
 	total_scores = []
 	total_results = []
-	for setting, i in expt_config.items():
+	for i in expt_config:
 		if type(i) == str:
 			checkpoints_path = i
 			model_config_fp = args.model_config
+			setting = i["name"]
 		else: #it's a dict
 			checkpoints_path = i["checkpoints_path"]
 			model_config_fp = i["model_config"]
+			setting = i["name"]
 		model_name: str = "opnet"
 		model_path: str = get_best_model_from_folder(checkpoints_path)
 		mcf: str = model_config_fp
