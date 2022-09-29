@@ -171,6 +171,8 @@ CRITICAL_FRAMES = {
 	"control_no_large" : [26, 40],
 	"twocup" : [32, 46],
 	"tcrhuge" : [32, 46],
+	"tcrhuge_freebie" : [32, 46],
+	"tcrhuge_twocup" : [32, 46],
 	"twocup_freebie" : [32, 46],
 	"threecup" : [33, 46],
 	"threecup2" : [33, 46],
