@@ -173,6 +173,7 @@ CRITICAL_FRAMES = {
 	"tcrhuge" : [32, 46],
 	"twocup_freebie" : [32, 46],
 	"threecup" : [33, 46],
+	"threecup2" : [33, 46],
 	"id_control": [41,46],
 	"roll_behind_occluder_easy": [41,47],
 	"roll_behind_occluder_hard": [41,47],
